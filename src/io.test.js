@@ -1,18 +1,15 @@
-import { batch, singleToMultiple, executeConditionally } from "./io";
 import {
+  always,
   concat,
-  head,
-  juxt,
-  last,
+  equals,
+  length,
   map,
   pipe,
+  prop,
   reduce,
   repeat,
-  always,
-  length,
-  equals,
-  prop,
 } from "ramda";
+import { batch, executeConditionally, singleToMultiple } from "./io";
 
 const sumOfThings = (numbers) =>
   Promise.resolve(
