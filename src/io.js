@@ -19,8 +19,14 @@ import {
   isNil,
   anyPass,
   juxt,
+  applySpec,
 } from "ramda";
-import { asyncJuxt, asyncPairRight, asyncPipe } from "./functional";
+import {
+  asyncJuxt,
+  asyncPairRight,
+  asyncPipe,
+  asyncExcepts,
+} from "./functional";
 
 const timeCondition = () => {
   let timePassed = false;
@@ -59,17 +65,26 @@ export const batch = (keyFn, waitTime, execute) => {
   return asyncPipe(
     asyncPairRight(keyFn),
     ([input, key]) =>
-      new Promise((resolve) => {
+      new Promise((resolve, reject) => {
         queues[key] = queues[key] || [];
-        queues[key].push([resolve, input]);
+        queues[key].push({ resolve, reject, input });
 
         setTimeout(
           pipe(
             () => queues[key],
             unless(
               isNil,
-              pipe(juxt([map(last), map(head)]), ([values, resolvers]) =>
-                execute(() => delete queues[key], stack(resolvers))(values)
+              pipe(
+                applySpec({
+                  input: map(prop("input")),
+                  reject: pipe(map(prop("reject")), juxt),
+                  resolve: pipe(map(prop("resolve")), stack),
+                }),
+                ({ input, resolve, reject }) =>
+                  asyncExcepts(
+                    execute(() => delete queues[key], resolve),
+                    reject
+                  )(input)
               )
             )
           ),

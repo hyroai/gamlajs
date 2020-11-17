@@ -70,3 +70,22 @@ test("batch condition", async () => {
   expect(result).toEqual([1, 2, 3, 4, 5]);
   expect(count).toEqual(1);
 });
+
+test("batch with exceptions", async () => {
+  const f = batch(
+    () => "key",
+    0,
+    executeConditionally(
+      () => Promise.reject("error!"),
+      pipe(length, equals(5))
+    )
+  );
+
+  expect.assertions(1);
+
+  try {
+    await Promise.all([f(1), f(2), f(3), f(4), f(5)]);
+  } catch (err) {
+    expect(err).toEqual("error!");
+  }
+});
