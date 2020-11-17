@@ -8,20 +8,13 @@ import {
   tap,
   unless,
   when,
-  zip,
 } from "ramda";
-import { asyncExcepts, asyncPairRight, asyncPipe } from "./functional";
+import { asyncExcepts, asyncPairRight, asyncPipe, stack } from "./functional";
 
 export const executeConditionally = (executeQueue, condition) => (
   clear,
   resolveAll
 ) => when(condition, asyncPipe(tap(clear), executeQueue, resolveAll));
-
-const stack = (functions) =>
-  pipe(
-    zip(functions),
-    map(([f, x]) => f(x))
-  );
 
 export const batch = (keyFn, waitTime, execute) => {
   const queues = {};

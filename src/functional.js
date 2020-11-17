@@ -97,3 +97,9 @@ export const asyncExcepts = (func, handler) => async (...args) => {
     return handler(err);
   }
 };
+
+export const stack = (functions) =>
+  pipe(
+    zip(functions),
+    map(([f, x]) => f(x))
+  );
