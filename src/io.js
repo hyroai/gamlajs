@@ -1,7 +1,10 @@
 import {
+  allPass,
   apply,
+  complement,
   equals,
   head,
+  isEmpty,
   last,
   length,
   map,
@@ -9,8 +12,39 @@ import {
   tap,
   unapply,
   zip,
+  zipWith,
+  when,
+  pipe,
+  unless,
+  isNil,
+  anyPass,
+  juxt,
 } from "ramda";
 import { asyncJuxt, asyncPairRight, asyncPipe } from "./functional";
+
+const timeCondition = () => {
+  let timePassed = false;
+  let timeout;
+
+  return () => {
+    if (timeout) {
+      return false;
+    }
+    timeout = setTimeout(() => (timePassed = true));
+    return timePassed;
+  };
+};
+
+export const executeConditionally = (executeQueue, condition) => (
+  clear,
+  resolveAll
+) => when(condition, asyncPipe(tap(clear), executeQueue, resolveAll));
+
+const stack = (functions) =>
+  pipe(
+    zip(functions),
+    map(([f, x]) => f(x))
+  );
 
 /**
  * Batches calls to `executeQueues` at a specified interval.
@@ -19,34 +53,31 @@ import { asyncJuxt, asyncPairRight, asyncPipe } from "./functional";
  * @param executeQueue - Invoked with a list of tasks. A task is a pair of [ resolve, [args] ].
  * @returns {function(...[*]): Promise}
  */
-export const batch = (argsToKey, waitTime, executeQueue) => {
+export const batch = (keyFn, waitTime, execute) => {
   const queues = {};
 
-  return unapply(
-    asyncPipe(
-      asyncPairRight(apply(argsToKey)),
-      ([args, key]) =>
-        new Promise((resolve) => {
-          queues[key] = queues[key] || [];
-          queues[key].push([resolve, args]);
+  return asyncPipe(
+    asyncPairRight(keyFn),
+    ([input, key]) =>
+      new Promise((resolve) => {
+        queues[key] = queues[key] || [];
+        queues[key].push([resolve, input]);
 
-          if (equals(length(queues[key]), 1)) {
-            setTimeout(() => {
-              asyncPipe(
-                prop(key),
-                tap(() => delete queues[key]),
-                asyncJuxt([map(head), asyncPipe(map(last), executeQueue)]),
-                apply(zip),
-                map(applyPair)
-              )(queues);
-            }, waitTime);
-          }
-        })
-    )
+        setTimeout(
+          pipe(
+            () => queues[key],
+            unless(
+              isNil,
+              pipe(juxt([map(last), map(head)]), ([values, resolvers]) =>
+                execute(() => delete queues[key], stack(resolvers))(values)
+              )
+            )
+          ),
+          waitTime
+        );
+      })
   );
 };
-
-const applyPair = ([f, args]) => f(args);
 
 /* Transform `f` into a function that receives a list of tasks and executes them in a single call to `f`.
  *   Where a task is the pair [ resolve, [args] ].
@@ -62,4 +93,4 @@ const applyPair = ([f, args]) => f(args);
  *    The function to transform.
  */
 export const singleToMultiple = (merge, split, f) => (tasks) =>
-  asyncPipe(merge, apply(f), (results) => split(tasks, results))(tasks);
+  asyncPipe(merge, f, (results) => split(tasks, results))(tasks);
