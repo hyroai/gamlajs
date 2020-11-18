@@ -1,5 +1,7 @@
 import {
   adjust,
+  all,
+  any,
   apply,
   chain,
   curry,
@@ -103,3 +105,8 @@ export const stack = (functions) =>
     (values) => zip(functions, values),
     map(([f, x]) => f(x))
   );
+
+const toBool = (val) => !!val;
+
+export const anyMap = (transformer) => pipe(map(transformer), any(toBool));
+export const allMap = (transformer) => pipe(map(transformer), all(toBool));

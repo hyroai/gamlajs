@@ -1,4 +1,6 @@
 const {
+  allMap,
+  anyMap,
   asyncFirst,
   asyncPipe,
   asyncIdentity,
@@ -123,4 +125,20 @@ test("test asyncTap", async () => {
   const result = await asyncTap((x) => Promise.resolve(x * 2))(2);
   expect.assertions(1);
   expect(result).toStrictEqual(2);
+});
+
+test("test anyMap1", () => {
+  expect(anyMap((x) => x > 5)([1, 2, 3, 4, 5])).toBeFalsy();
+});
+
+test("test anyMap2", () => {
+  expect(anyMap((x) => x > 5)([1, 2, 3, 4, 5, 6])).toBeTruthy();
+});
+
+test("test allMap1", () => {
+  expect(allMap((x) => x > 1)([1, 2, 3, 4, 5])).toBeFalsy();
+});
+
+test("test allMap2", () => {
+  expect(allMap((x) => x > 0)([1, 2, 3, 4, 5])).toBeTruthy();
 });
