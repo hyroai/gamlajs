@@ -4,7 +4,9 @@ const {
   asyncIdentity,
   asyncIfElse,
   asyncJuxt,
+  asyncJuxtCat,
   asyncMap,
+  asyncMapCat,
   asyncFilter,
   keyMap,
   asyncReduce,
@@ -132,4 +134,21 @@ test("test asyncIfElse", async () => {
   expect.assertions(2);
   expect(await testFunction(2)).toStrictEqual(true);
   expect(await testFunction(3)).toStrictEqual(false);
+});
+
+test("asyncJuxtCat", async () => {
+  const testFunction = asyncJuxtCat([
+    (x) => Promise.resolve([x, x + 1]),
+    (x) => Promise.resolve([x + 2, x + 3]),
+  ]);
+
+  expect.assertions(1);
+  expect(await testFunction(1)).toStrictEqual([1, 2, 3, 4]);
+});
+
+test("asyncMap", async () => {
+  const testFunction = asyncMapCat((x) => Promise.resolve([x, x + 1]));
+
+  expect.assertions(1);
+  expect(await testFunction([1, 2])).toStrictEqual([1, 2, 2, 3]);
 });
