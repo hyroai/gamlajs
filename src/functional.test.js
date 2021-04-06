@@ -4,15 +4,15 @@ const {
   asyncIdentity,
   asyncIfElse,
   asyncJuxt,
-  asyncJuxtCat,
   asyncMap,
-  asyncMapCat,
   asyncFilter,
   keyMap,
   asyncReduce,
   zip,
   asyncPairRight,
   asyncTap,
+  juxtCat,
+  mapCat,
 } = require("./functional");
 const { equals, multiply, map, unapply, T, F } = require("ramda");
 
@@ -136,8 +136,8 @@ test("test asyncIfElse", async () => {
   expect(await testFunction(3)).toStrictEqual(false);
 });
 
-test("asyncJuxtCat", async () => {
-  const testFunction = asyncJuxtCat([
+test("juxtCat", async () => {
+  const testFunction = juxtCat([
     (x) => Promise.resolve([x, x + 1]),
     (x) => Promise.resolve([x + 2, x + 3]),
   ]);
@@ -146,8 +146,8 @@ test("asyncJuxtCat", async () => {
   expect(await testFunction(1)).toStrictEqual([1, 2, 3, 4]);
 });
 
-test("asyncMap", async () => {
-  const testFunction = asyncMapCat((x) => Promise.resolve([x, x + 1]));
+test("mapCat", async () => {
+  const testFunction = mapCat((x) => Promise.resolve([x, x + 1]));
 
   expect.assertions(1);
   expect(await testFunction([1, 2])).toStrictEqual([1, 2, 2, 3]);
