@@ -155,13 +155,13 @@ export const asyncValMap = (f) =>
 // See MDN Object constructor.
 const isObject = (obj) => obj === Object(obj);
 
-export const asyncMapObject = (terminalMapper) => (obj) => {
+export const asyncMapObjectTerminals = (terminalMapper) => (obj) => {
   if (Array.isArray(obj)) {
-    return asyncMap(asyncMapObject(terminalMapper), obj);
+    return asyncMap(asyncMapObjectTerminals(terminalMapper), obj);
   }
 
   if (isObject(obj) && !(obj instanceof Function)) {
-    return asyncValMap(asyncMapObject(terminalMapper))(obj);
+    return asyncValMap(asyncMapObjectTerminals(terminalMapper))(obj);
   }
 
   return terminalMapper(obj);
@@ -173,4 +173,7 @@ export const applyTo =
   (f) =>
     f(...args);
 
-export const asyncApplySpec = (spec) => (x) => asyncMapObject(applyTo(x))(spec);
+export const asyncApplySpec =
+  (spec) =>
+  (...args) =>
+    asyncMapObjectTerminals(applyTo(...args))(spec);

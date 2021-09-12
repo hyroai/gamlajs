@@ -6,7 +6,7 @@ const {
   asyncIfElse,
   asyncJuxt,
   asyncMap,
-  asyncMapObject,
+  asyncMapObjectTerminals,
   asyncPairRight,
   asyncPipe,
   asyncReduce,
@@ -179,7 +179,7 @@ test("asyncValMap", async () => {
 
 test("asyncMapObject", async () => {
   expect(
-    await asyncMapObject((x) => Promise.resolve(x + 1))({
+    await asyncMapObjectTerminals((x) => Promise.resolve(x + 1))({
       a: { a: 1, b: 2 },
       b: 3,
       c: [1, 2, 3],
