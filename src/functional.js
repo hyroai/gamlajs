@@ -177,3 +177,8 @@ export const asyncApplySpec =
   (spec) =>
   (...args) =>
     asyncMapObjectTerminals(applyTo(...args))(spec);
+
+export const product = reduce(
+  (a, b) => a.flatMap((x) => b.map((y) => [...x, y])),
+  [[]]
+);

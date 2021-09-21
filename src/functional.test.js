@@ -19,6 +19,7 @@ const {
   mapCat,
   testRegExp,
   zip,
+  product,
 } = require("./functional");
 const { equals, multiply, map, unapply, T, F } = require("ramda");
 
@@ -198,4 +199,20 @@ test("asyncApplySpec", async () => {
       b: { a: (obj) => Promise.resolve(obj.y) },
     })({ x: 1, y: 2 })
   ).toEqual({ a: 1, b: { a: 2 } });
+});
+
+test("product", () => {
+  expect(product([])).toEqual([[]]);
+  expect(product([[], [1, 2, 3]])).toEqual([]);
+  expect(
+    product([
+      ["a", "b"],
+      [1, 2],
+    ])
+  ).toEqual([
+    ["a", 1],
+    ["a", 2],
+    ["b", 1],
+    ["b", 2],
+  ]);
 });
