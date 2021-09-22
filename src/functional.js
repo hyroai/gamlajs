@@ -21,7 +21,6 @@ import {
   pipe,
   prop,
   reduce,
-  reject,
   sum,
   toPairs,
   uniq,
@@ -208,7 +207,8 @@ export const addDays = (date, days) => {
   result.setDate(result.getDate() + days);
   return result;
 };
-export const remove = reject;
+
+export const remove = pipe(complement, (f) => (arr) => arr.remove(f));
 
 export const explode = (...positions) =>
   pipe(
