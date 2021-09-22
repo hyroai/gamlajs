@@ -243,3 +243,8 @@ export const valmap = (f) => (o) =>
   Object.fromEntries(Object.entries(o).map(([x, y]) => [x, f(y)]));
 
 export const average = (arr) => sum(arr) / arr.length;
+
+export const between =
+  ([start, end]) =>
+  (x) =>
+    start <= x && x < end;

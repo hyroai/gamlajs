@@ -21,6 +21,7 @@ const {
   zip,
   product,
   explode,
+  between,
 } = require("./functional");
 const { equals, multiply, map, unapply, T, F } = require("ramda");
 
@@ -224,4 +225,10 @@ test("explode", () => {
     ["a", 2, "b"],
     ["a", 3, "b"],
   ]);
+});
+
+test("between", () => {
+  expect(between([1, 2])(1)).toBeTruthy();
+  expect(between([1, 2])(2)).toBeFalsy();
+  expect(between([1, 4])(2.5)).toBeTruthy();
 });
