@@ -2,7 +2,7 @@ const {
   asyncApplySpec,
   asyncFilter,
   asyncFirst,
-  asyncIdentity,
+  wrapPromise,
   asyncIfElse,
   asyncJuxt,
   asyncMap,
@@ -26,7 +26,7 @@ const {
 const { equals, multiply, map, unapply, T, F } = require("ramda");
 
 test("test asyncPipe", async () => {
-  const result = await asyncPipe(asyncIdentity, (input) =>
+  const result = await asyncPipe(wrapPromise, (input) =>
     Promise.resolve(multiply(input, 2))
   )(2);
   expect.assertions(1);
@@ -36,7 +36,7 @@ test("test asyncPipe", async () => {
 test("test asyncFirst", async () => {
   const result = await asyncFirst(
     () => Promise.resolve(null),
-    asyncIdentity
+    wrapPromise
   )([1, 2, 3]);
 
   expect.assertions(1);
@@ -62,7 +62,7 @@ test("test async map", async () => {
 
 test("test async juxt", async () => {
   const result = await asyncJuxt([
-    unapply(asyncIdentity),
+    unapply(wrapPromise),
     unapply((input) => Promise.resolve(map(multiply(2), input))),
   ])(2, 3);
 

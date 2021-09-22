@@ -38,7 +38,8 @@ export const groupByMany = (f) =>
 
 const resolveAll = (promises) => Promise.all(promises);
 
-export const asyncIdentity = (input) => Promise.resolve(input);
+// Cannot be made point free.
+export const wrapPromise = (x) => Promise.resolve(x);
 
 export const asyncPipe =
   (...funcs) =>
@@ -191,6 +192,8 @@ export const sideEffect = (f) => (x) => {
   return x;
 };
 
+export const wrapArray = (x) => [x];
+
 export const log = sideEffect(console.log);
 export const logTable = sideEffect(console.table);
 export const includedIn = (stuff) => (x) => stuff.includes(x);
@@ -209,12 +212,7 @@ export const remove = reject;
 
 export const explode = (...positions) =>
   pipe(
-    addIndex(map)(
-      doOnPositions(
-        (x) => [x],
-        complement((x) => positions.includes(x))
-      )
-    ),
+    addIndex(map)(doOnPositions(wrapArray, complement(includedIn(positions)))),
     product
   );
 
