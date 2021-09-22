@@ -1,7 +1,9 @@
 import {
+  addIndex,
   adjust,
   apply,
   chain,
+  complement,
   concat,
   curry,
   filter,
@@ -10,14 +12,17 @@ import {
   groupBy,
   head,
   identity,
+  ifElse,
   includes,
   juxt,
   last,
   map,
   nth,
   pipe,
+  prop,
   reduce,
-  tap,
+  reject,
+  sum,
   toPairs,
   uniq,
   xprod,
@@ -30,8 +35,6 @@ export const groupByMany = (f) =>
     chain(pipe((element) => [f(element), [element]], apply(xprod))),
     edgesToGraph
   );
-
-export const log = tap(console.log);
 
 const resolveAll = (promises) => Promise.all(promises);
 
@@ -182,3 +185,61 @@ export const product = reduce(
   (a, b) => a.flatMap((x) => b.map((y) => [...x, y])),
   [[]]
 );
+
+export const sideEffect = (f) => (x) => {
+  f(x);
+  return x;
+};
+
+export const log = sideEffect(console.log);
+export const logTable = sideEffect(console.table);
+export const includedIn = (stuff) => (x) => stuff.includes(x);
+export const logWith = (...x) => sideEffect((y) => console.log(...x, y));
+export const pack = (...stuff) => stuff;
+
+const doOnPositions = (f, predicate) =>
+  pipe(pack, ifElse(pipe(nth(1), predicate), pipe(head, f), head));
+
+export const addDays = (date, days) => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+export const remove = reject;
+
+export const explode = (...positions) =>
+  pipe(
+    addIndex(map)(
+      doOnPositions(
+        (x) => [x],
+        complement((x) => positions.includes(x))
+      )
+    ),
+    product
+  );
+
+export const anymap = (f) => (arr) => arr.some(f);
+export const allmap = (f) => (arr) => arr.every(f);
+export const count = prop("length");
+export const mapcat = (f) => pipe(map(f), reduce(concat, []));
+export const rate = (f) =>
+  pipe(juxt([pipe(filter(f), count), count]), ([x, y]) => x / y);
+
+// Cannot be made point free.
+export const promiseAll = (promises) => Promise.all(promises);
+
+export const countTo = (x) => {
+  const result = [];
+  for (let i = 0; i < x; i++) result.push(i);
+  return result;
+};
+
+export const divide = (x) => (y) => y / x;
+export const times = (x) => (y) => y * x;
+
+export const lastNDays = (n) => [addDays(Date.now(), -n), Date.now()];
+
+export const valmap = (f) => (o) =>
+  Object.fromEntries(Object.entries(o).map(([x, y]) => [x, f(y)]));
+
+export const average = (arr) => sum(arr) / arr.length;
