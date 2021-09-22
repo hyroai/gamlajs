@@ -35,7 +35,8 @@ export const groupByMany = (f) =>
     edgesToGraph
   );
 
-const resolveAll = (promises) => Promise.all(promises);
+// Cannot be made point free.
+export const promiseAll = (promises) => Promise.all(promises);
 
 // Cannot be made point free.
 export const wrapPromise = (x) => Promise.resolve(x);
@@ -50,7 +51,7 @@ export const asyncFirst =
   async (...args) => {
     const results = await asyncPipe(
       map((f) => f(...args)),
-      resolveAll,
+      promiseAll,
       filter(identity)
     )(funcs);
 
@@ -59,13 +60,13 @@ export const asyncFirst =
     }
   };
 
-export const asyncMap = curry((f, seq) => asyncPipe(map(f), resolveAll)(seq));
+export const asyncMap = curry((f, seq) => asyncPipe(map(f), promiseAll)(seq));
 
 export const asyncJuxt =
   (funcs) =>
   (...args) =>
     // asyncPipe is unary so we apply.
-    asyncPipe(juxt(map(apply, funcs)), resolveAll)(args);
+    asyncPipe(juxt(map(apply, funcs)), promiseAll)(args);
 
 export const asyncFilter = (pred) =>
   asyncPipe(
@@ -222,9 +223,6 @@ export const count = prop("length");
 export const mapcat = (f) => pipe(map(f), reduce(concat, []));
 export const rate = (f) =>
   pipe(juxt([pipe(filter(f), count), count]), ([x, y]) => x / y);
-
-// Cannot be made point free.
-export const promiseAll = (promises) => Promise.all(promises);
 
 export const countTo = (x) => {
   const result = [];
