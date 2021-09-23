@@ -21,7 +21,6 @@ import {
   pipe,
   prop,
   reduce,
-  sum,
   toPairs,
   uniq,
   xprod,
@@ -203,12 +202,6 @@ export const pack = (...stuff) => stuff;
 const doOnPositions = (f, predicate) =>
   pipe(pack, ifElse(pipe(nth(1), predicate), pipe(head, f), head));
 
-export const addDays = (date, days) => {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-};
-
 export const remove = pipe(complement, (f) => (arr) => arr.remove(f));
 
 export const explode = (...positions) =>
@@ -230,15 +223,8 @@ export const countTo = (x) => {
   return result;
 };
 
-export const divide = (x) => (y) => y / x;
-export const times = (x) => (y) => y * x;
-
-export const lastNDays = (n) => [addDays(Date.now(), -n), Date.now()];
-
 export const valmap = (f) => (o) =>
   Object.fromEntries(Object.entries(o).map(([x, y]) => [x, f(y)]));
-
-export const average = (arr) => sum(arr) / arr.length;
 
 export const between =
   ([start, end]) =>
