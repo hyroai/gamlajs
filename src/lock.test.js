@@ -102,14 +102,23 @@ test("sequentialized", async () => {
 });
 
 test("throttle", async () => {
-  let factor = 0;
-
-  const multiply = async (x) => {
-    factor = factor + 1;
-    await sleep(0.01);
-    return x * factor;
+  let maxConcurrent = 0;
+  let insideNow = 0;
+  const enter = () => {
+    insideNow++;
+    maxConcurrent = Math.max(maxConcurrent, insideNow);
+  };
+  const exit = () => {
+    insideNow--;
   };
 
-  const result = await asyncMap(throttle(1, multiply))([1, 2, 3]);
-  expect(result).toStrictEqual([1, 4, 9]);
+  const mapFn = async (x) => {
+    enter();
+    await sleep(0.01);
+    exit();
+    return x;
+  };
+
+  await asyncMap(throttle(1, mapFn))([1, 2, 3]);
+  expect(maxConcurrent).toEqual(1);
 });
