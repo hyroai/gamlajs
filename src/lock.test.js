@@ -7,7 +7,7 @@ const {
   throttle,
 } = require("./lock");
 const { asyncMap } = require("./functional");
-const { identity, map } = require("ramda");
+const { identity } = require("ramda");
 
 const pushToArrayAfterMs = (arr) => async (key, ms) => {
   await sleep(ms);
