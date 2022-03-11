@@ -7,7 +7,7 @@ const {
   throttle,
 } = require("./lock");
 const { asyncMap } = require("./functional");
-const { identity } = require("ramda");
+const { identity, map } = require("ramda");
 
 const pushToArrayAfterMs = (arr) => async (key, ms) => {
   await sleep(ms);
@@ -87,6 +87,45 @@ test("test lock by input", async () => {
   await Promise.all([f2("key1", 300), f2("key1", 100)]);
   expect(results1).toStrictEqual([100, 300]);
   expect(results2).toStrictEqual([300, 100]);
+});
+
+test("lock with exception", async () => {
+  let locked = false;
+  let shouldThrow = false;
+  const [lock, unlock] = makeLockUnlockWithId(
+    () => {
+      if (locked) {
+        return false;
+      }
+      locked = true;
+      return locked;
+    },
+    async () => {
+      await sleep(0.01);
+      locked = false;
+    }
+  );
+
+  const func = withLock(lock, unlock, (x) => {
+    shouldThrow = !shouldThrow;
+    if (!shouldThrow) {
+      throw new Error("AAA");
+    }
+    return x;
+  });
+
+  const result = await asyncMap(
+    async (x) => {
+      try {
+        return await func(x);
+      } catch (e) {
+        return 0;
+      }
+    },
+    [1, 1, 1, 1]
+  );
+
+  expect(result).toEqual([1, 0, 1, 0]);
 });
 
 test("sequentialized", async () => {
