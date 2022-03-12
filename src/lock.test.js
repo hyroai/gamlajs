@@ -109,7 +109,7 @@ test("lock with exception", async () => {
   const func = withLock(lock, unlock, (x) => {
     shouldThrow = !shouldThrow;
     if (!shouldThrow) {
-      throw new Error("AAA");
+      throw new Error("Error!");
     }
     return x;
   });
