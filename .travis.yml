@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-- 16
+- "stable"
 before_deploy: "npm run build"
 deploy:
   provider: npm
