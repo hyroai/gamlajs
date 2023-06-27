@@ -1,4 +1,5 @@
 import { F, T, ifElse, pipe } from "ramda";
+import { getCacheKey } from "./cache";
 import { sleep } from "./time";
 
 export const withLock =
@@ -74,4 +75,19 @@ export const throttle = (maxParallelism, f) => {
     ),
     f
   );
+};
+
+export const singleton = (factory) => {
+  const instances = {};
+  const throttledFactory = throttle(1, factory);
+
+  return async (...args) => {
+    const key = getCacheKey(args);
+    if (instances[key]) {
+      return instances[key];
+    }
+
+    instances[key] = await throttledFactory(...args);
+    return instances[key];
+  };
 };

@@ -2,7 +2,7 @@ import NodeCache from "node-cache";
 import hash from "object-hash";
 import { isNil } from "ramda";
 
-const getCacheKey = (args) => hash.sha1(args);
+export const getCacheKey = (args) => hash.sha1(args);
 
 export const withCacheAsync = (f, options) => {
   const cache = new NodeCache(options);

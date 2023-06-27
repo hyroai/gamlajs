@@ -3,6 +3,7 @@ const {
   makeLockUnlockWithId,
   withLockByInput,
   sequentialized,
+  singleton,
   throttle,
 } = require("./lock");
 const { sleep } = require("./time");
@@ -160,4 +161,16 @@ test("throttle", async () => {
 
   await asyncMap(throttle(1, mapFn))([1, 2, 3]);
   expect(maxConcurrent).toEqual(1);
+});
+
+test("singleton", async () => {
+  const factory = singleton(async (a, b) => {
+    await sleep(0.01);
+    return { a, b };
+  });
+
+  const res = await factory("a", "b");
+
+  expect(res).toBe(await factory("a", "b"));
+  expect(res).not.toBe(await factory("b", "c"));
 });
