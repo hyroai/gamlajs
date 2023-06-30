@@ -169,8 +169,30 @@ test("singleton", async () => {
     return { a, b };
   });
 
-  const res = await factory("a", "b");
+  const [res1, res2] = await Promise.all([
+    factory("a", "b"),
+    factory("a", "b"),
+  ]);
 
-  expect(res).toBe(await factory("a", "b"));
-  expect(res).not.toBe(await factory("b", "c"));
+  expect(res1).toBe(res2);
+  expect(res1).not.toBe(await factory("b", "c"));
+});
+
+test("singleton with raise", async () => {
+  let shouldRaise = true;
+  const factory = singleton(async (x) => {
+    await sleep(0.1);
+    if (shouldRaise) {
+      throw new Error("Raising exception!");
+    }
+    return x;
+  });
+
+  try {
+    await factory(1);
+  } catch (e) {
+    shouldRaise = false;
+  }
+
+  expect(await factory(1)).toEqual(1);
 });
