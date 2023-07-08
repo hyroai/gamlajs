@@ -1,4 +1,5 @@
 import { F, T, ifElse, pipe } from "ramda";
+import { getCacheKey } from "./cache";
 import { sleep } from "./time";
 
 export const withLock =
@@ -74,4 +75,46 @@ export const throttle = (maxParallelism, f) => {
     ),
     f
   );
+};
+
+export const singleton = (factory) => {
+  const instances = {};
+  const lockObj = {};
+
+  const [lock, unlock] = makeLockUnlockWithId(
+    (id) => {
+      if (lockObj[id]) {
+        return false;
+      }
+      lockObj[id] = true;
+      return true;
+    },
+    (id) => {
+      delete lockObj[id];
+      return false;
+    }
+  );
+
+  return async (...args) => {
+    const key = getCacheKey(args);
+    if (instances[key]) {
+      return instances[key];
+    }
+    await lock(key);
+
+    if (instances[key]) {
+      unlock(key);
+      return instances[key];
+    }
+
+    try {
+      instances[key] = await factory(...args);
+      unlock(key);
+    } catch (e) {
+      unlock(key);
+      throw e;
+    }
+
+    return instances[key];
+  };
 };

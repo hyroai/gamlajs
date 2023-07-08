@@ -3,6 +3,7 @@ const {
   makeLockUnlockWithId,
   withLockByInput,
   sequentialized,
+  singleton,
   throttle,
 } = require("./lock");
 const { sleep } = require("./time");
@@ -160,4 +161,38 @@ test("throttle", async () => {
 
   await asyncMap(throttle(1, mapFn))([1, 2, 3]);
   expect(maxConcurrent).toEqual(1);
+});
+
+test("singleton", async () => {
+  const factory = singleton(async (a, b) => {
+    await sleep(0.01);
+    return { a, b };
+  });
+
+  const [res1, res2] = await Promise.all([
+    factory("a", "b"),
+    factory("a", "b"),
+  ]);
+
+  expect(res1).toBe(res2);
+  expect(res1).not.toBe(await factory("b", "c"));
+});
+
+test("singleton with raise", async () => {
+  let shouldRaise = true;
+  const factory = singleton(async (x) => {
+    await sleep(0.1);
+    if (shouldRaise) {
+      throw new Error("Raising exception!");
+    }
+    return x;
+  });
+
+  try {
+    await factory(1);
+  } catch (e) {
+    shouldRaise = false;
+  }
+
+  expect(await factory(1)).toEqual(1);
 });
